@@ -1,6 +1,6 @@
 def branchName     = params.BranchName ?: "main"
-def gitUrl         = "https://github.com/malikalaja/Html.git"
-def gitUrlCode     = "https://github.com/malikalaja/Html.git"
+def gitUrl         = "git@github.com:malikalaja/Html.git"
+def gitUrlCode     = "git@github.com:malikalaja/Html.git"
 def serviceName    = "html"
 def EnvName        = "preprod"
 def registryId     = "727245885999.dkr.ecr.ap-south-1.amazonaws.com"
