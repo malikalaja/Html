@@ -218,7 +218,7 @@ autoscaling:
   # targetMemoryUtilizationPercentage: 80
 image:
   repository: 727245885999.dkr.ecr.ap-south-1.amazonaws.com/html
-  tag: preprod-15
+  tag: preprod-16
 # Database migration configuration
 # goDBMigration:
 #        enabled: false
