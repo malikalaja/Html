@@ -34,8 +34,8 @@ deployment:
   #   - name: docker    ### if required
   image:
     repository: htmltask
-    pullPolicy: IfNotPresent
-    tag: "1.0.0"
+    pullPolicy: Never
+    tag: "v2"
     # volumeMounts:
     #   - mountPath: /etc/localtime
     #     name: tz-config
