@@ -34,7 +34,17 @@ pipeline {
         
         stage("Get the env variables from App") {
             steps {
-                sh "aws appconfig get-configuration --application ${applicationName} --environment ${envName} --configuration ${configName} --client-id ${clientId} .env --region ${awsRegion}"
+                script {
+                    try {
+                        sh "aws appconfig get-configuration --application ${applicationName} --environment ${envName} --configuration ${configName} --client-id ${clientId} .env --region ${awsRegion}"
+                        echo "AppConfig configuration retrieved successfully"
+                    } catch (Exception e) {
+                        echo "AppConfig configuration not found, continuing without it: ${e.getMessage()}"
+                        // Create empty .env file to prevent pipeline failure
+                        sh "touch .env"
+                        echo "Created empty .env file"
+                    }
+                }
             }
         }
         
