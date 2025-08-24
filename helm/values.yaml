@@ -1,0 +1,263 @@
+# Override the default helm chart name
+nameOverride: &nameOverride "htmltask"
+
+# Override the default helm chart full name
+fullnameOverride: &fullnameOverride "htmltask"
+
+# Specify the cluster name
+cluster: &cluster "prod"
+
+# Specify the environment name (production, staging, prodelopment, etc.)
+environment: &environment "prod"
+
+# Labels to attach to all Kubernetes resources created by this chart
+commonLabels:
+  app_name: *nameOverride
+  app_env: *environment
+  app: *nameOverride
+selectorLabels:
+      app_name: htmltask
+# Configuration for the service account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: *nameOverride
+  multiServiceAccounts: 
+    enabled: false
+    # Example of multiple service accounts
+    # names:
+    #   - example-service-account
+
+# Deployment configuration
+deployment:
+  version: "prod-057533f-204"
+  # postStartCommand: "composer dumpautoload"
+  enabled: true
+  replicaCount: 1
+  revisionHistoryLimit: 3
+  # imagePullSecrets:
+  #   - name: docker    ### if required
+  image:
+    repository: htmltask
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  # volumeMounts:
+  #   - mountPath: /etc/localtime
+  #     name: tz-config
+#  envFrom:
+  livenessProbe:
+    httpGet:
+      path: /
+      port: 80
+    initialDelaySeconds: 10
+    periodSeconds: 15
+    failureThreshold: 3
+    timeoutSeconds: 30
+  readinessProbe:
+    httpGet:
+      path: /
+      port: 80
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    failureThreshold: 1
+    timeoutSeconds: 10
+  startupProbe: {}
+  podAnnotations: {}
+  serviceDefault:
+    enabled: false
+  serviceIntention:
+    enabled: false
+  podSecurityContext: {}
+  securityContext: {}
+  resources: 
+    requests:
+      memory: 256Mi
+      cpu: 50m
+    limits:
+      memory: 3000Mi
+      cpu: 1000m
+  nodeSelector: {}
+  tolerations: []
+  # affinity:
+  #   nodeAffinity:
+  #     requiredDuringSchedulingIgnoredDuringExecution:
+  #       nodeSelectorTerms:
+  #       - matchExpressions:
+  #         - key: name
+  #           operator: In
+  #           values:
+  #         - PROD-Workers
+#   volumes:
+#     - name: tz-config
+#       hostPath:
+#         path: /usr/share/zoneinfo/Asia/Riyadh
+# StatefulSet:
+#   enabled: false
+# cronjobs:
+#   enabled: false
+#   jobs:
+#     - name: "update-orders-cron"
+#       type: "externalSecret"
+#       envFrom: "externalSecret"
+#       env:
+#         SPRING_CONFIG_LOCATION: "/app/config/"
+#       image:
+#         repository: 518962303326.dkr.ecr.ap-south-1.amazonaws.com/mp-ordermanagement-service
+#         pullPolicy: Always
+#         tag: "nonprod-289-test"
+#       volumeMounts:
+#         - mountPath: "/app/config"
+#           name: "application-config"
+#       restartPolicy: OnFailure
+#       schedule: "* * * * *"
+#       podAnnotations:
+#         sidecar.istio.io/inject: "false"
+#       command:
+#         - "java"
+#         - "-jar"
+#         - "-Dserver.port=9003"
+#         - "/app/myapp.jar"
+#         - "UpdateOrders"
+#       volumes:
+#         - name: "application-config"
+#           configMap:
+#             name: "mp-ordermanagement-service-configmap"
+#     - name: "update-orders-cron-2"
+#       type: "externalSecret"
+#       envFrom: "externalSecret"
+#       env:
+#         SPRING_CONFIG_LOCATION: "/app/config/"
+#       image:
+#         repository: 518962303326.dkr.ecr.ap-south-1.amazonaws.com/mp-ordermanagement-service
+#         pullPolicy: Always
+#         tag: "nonprod-289-test"
+#       volumeMounts:
+#         - mountPath: "/app/config"
+#           name: "application-config"
+#       restartPolicy: OnFailure
+#       schedule: "* * * * *"
+#       podAnnotations:
+#         sidecar.istio.io/inject: "false"
+#       command:
+#         - "java"
+#         - "-jar"
+#         - "-Dserver.port=9003"
+#         - "/app/myapp.jar"
+#         - "UpdateOrders"
+#       volumes:
+#         - name: "application-config"
+#           configMap:
+#             name: "mp-ordermanagement-service-configmap"
+# ConfigMap configuration
+# configMap:
+#   config:
+#     suffix: config
+#     data: 
+#       App: *nameOverride
+#       Description: Generic description
+service:
+  enabled: true
+  type: ClusterIP
+  name: *nameOverride
+  port: 
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http-web
+  multiServices:
+    enabled: false
+# Ingress configuration
+# ingress:
+#   enabled: true
+#   className: nginx
+#   secretName: "tls-secret"
+#   hosts:
+#     - host: slashtecapp-public.cloud
+#       http:
+#         paths:
+#         - backend:
+#             service:
+#               name: *nameOverride
+#               port:
+#                 number: 80
+#           path: /
+#           pathType: ImplementationSpecific
+#     - host: slashtecapp-internal.cloud
+#       http:
+#         paths:
+#         - backend:
+#             service:
+#               name: *nameOverride
+#               port:
+#                 number: 80
+#           path: /
+#           pathType: ImplementationSpecific
+#   tls:
+#     enabled: true
+# ExternalSecret configuration
+# externalSecret:
+#   enabled: false
+#   suffix: secret
+#   kind: ClusterSecretStore
+#   secretStore: drone-secret-store
+#   secretPath: /path/to/external/secret
+
+# serviceMonitor:
+#  enabled: false
+# podMonitor:
+#  enabled: false
+# volumes:
+#   enabled: false
+# Autoscaling configuration
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 2
+  targetCPUScaling: 80
+  targetMemScaling: 80
+  customTargets: []
+  scaleTarget: {}
+  # Example of Autoscaling configuration
+  # targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# Database migration configuration
+# goDBMigration:
+#        enabled: false
+# rustDBMigration:
+#   enabled: false
+# runCommandsBeforeDeploy:
+#   enabled: false
+#   backoffLimit: 3  # Number of retries before considering the job failed
+#   command: ["/bin/bash"]
+#   args: 
+#    - -c
+#    - cd /var/www/html && /usr/local/bin/php /var/www/html/artisan migrate --force && /usr/local/bin/php /var/www/html/artisan storage:link
+
+  # Example of Database migration configuration
+  # replicaCount: 1
+  # imagePullSecrets:
+  #   - name: example-image-pull-secret
+  # image:
+  #   repository: example-repository
+  #   pullPolicy: IfNotPresent
+  #   tag: example-ta:wqg
+  # livenessProbe: {}
+  # readinessProbe: {}
+  # startupProbe: {}
+  # podAnnotations: {}
+  # podSecurityContext: {}
+  # securityContext: {}
+  # resources: 
+  #   requests:
+  #     memory: example-memory-request
+  #     cpu: example-cpu-request
+  #   limits:
+  #     memory: example-memory-limit
+  #     cpu: example-cpu-limit
+  # nodeSelector: {}
+  # tolerations: []
+  # affinity: {}
+  # envFrom:
+  #   - type: configmap
+  #     suffix: example-configmap

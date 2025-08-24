@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: htmltask
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/malikalaja/Html.git
+    targetRevision: main
+    path: helm
+    helm:
+      valueFiles:
+        - values.yaml
+      values: |
+        image:
+          repository: 518962303326.dkr.ecr.ap-south-1.amazonaws.com/htmltask
+          tag: latest
+          pullPolicy: Always
+        ingress:
+          enabled: true
+          hosts:
+                - host: htmltask.preprod.slashtec.com
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: preprod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+
+
+
+
