@@ -1,7 +1,7 @@
 def branchName     = params.BranchName ?: "main"
 def gitUrl         = "https://github.com/malikalaja/Html.git"
 def gitUrlCode     = "https://github.com/malikalaja/Html.git"
-def serviceName    = "htmltask"
+def serviceName    = "html"
 def EnvName        = "preprod"
 def registryId     = "727245885999.dkr.ecr.ap-south-1.amazonaws.com"
 def awsRegion      = "ap-south-1"
@@ -53,14 +53,15 @@ pipeline {
         stage ("Deploy to Environment") {
             steps {
                 script {
-                    sh ("cd ${helmDir}; pathEnv=\".deployment.image.tag\" valueEnv=\"${imageTag}\" yq 'eval(strenv(pathEnv)) = strenv(valueEnv)' -i values.yaml ; cat values.yaml")
+                    sh ("cd ${helmDir}; yq eval -i '.image.repository = \"${ecrUrl}\"' values.yaml")
+                    sh ("cd ${helmDir}; yq eval -i '.image.tag = \"${imageTag}\"' values.yaml ; cat values.yaml")
                     sh ("cd ${helmDir}; git config user.email 'jenkins@local'")
                     sh ("cd ${helmDir}; git config user.name 'Jenkins'")
                     sh ("cd ${helmDir}; git fetch origin ${branchName}")
                     sh ("cd ${helmDir}; git checkout ${branchName} || true")
                     sh ("cd ${helmDir}; git pull origin ${branchName}")
                     sh ("cd ${helmDir}; git add values.yaml")
-                    sh ("cd ${helmDir}; git commit -m 'update image tag ${imageTag}'")
+                    sh ("cd ${helmDir}; git commit -m 'update image tag ${imageTag}' || true")
                     sh ("cd ${helmDir}; git push origin ${branchName}")
                 }
             }
