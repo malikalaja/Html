@@ -29,8 +29,8 @@ node {
         sh "rm -rf ~/workspace/\"${JOB_NAME}\"/htmltask"
         sh "mkdir ~/workspace/\"${JOB_NAME}\"/htmltask  ; cd htmltask ; git clone -b main ${gitUrl} "
         sh("cp ${htmltaskDir}/Dockerfile ${dockerfile}")
-        # sh("cp -r  ${htmltaskDir}/docker/* .")
-        # sh("cp -r  ${htmltaskDir}/files/* .")
+        sh("cp -r  ${htmltaskDir}/docker/* .")
+        sh("cp -r  ${htmltaskDir}/files/* .")
       }
       stage("Get the env variables from App") {
         sh "aws appconfig get-configuration --application ${applicationName} --environment ${envName} --configuration ${configName} --client-id ${clientId} .env --region ${awsRegion}"
