@@ -1,33 +1,28 @@
 # Override the default helm chart name
 nameOverride: &nameOverride "htmltask"
-
 # Override the default helm chart full name
 fullnameOverride: &fullnameOverride "htmltask"
-
 # Specify the cluster name
 cluster: &cluster "prod"
-
 # Specify the environment name (production, staging, prodelopment, etc.)
 environment: &environment "prod"
-
 # Labels to attach to all Kubernetes resources created by this chart
 commonLabels:
   app_name: *nameOverride
   app_env: *environment
   app: *nameOverride
 selectorLabels:
-      app_name: htmltask
+  app_name: htmltask
 # Configuration for the service account
 serviceAccount:
   create: true
   annotations: {}
   name: *nameOverride
-  multiServiceAccounts: 
+  multiServiceAccounts:
     enabled: false
     # Example of multiple service accounts
     # names:
     #   - example-service-account
-
 # Deployment configuration
 deployment:
   version: "prod-057533f-204"
@@ -41,10 +36,11 @@ deployment:
     repository: htmltask
     pullPolicy: IfNotPresent
     tag: "1.0.0"
-  # volumeMounts:
-  #   - mountPath: /etc/localtime
-  #     name: tz-config
-#  envFrom:
+    # volumeMounts:
+    #   - mountPath: /etc/localtime
+    #     name: tz-config
+  #  envFrom:
+
   livenessProbe:
     httpGet:
       path: /
@@ -69,7 +65,7 @@ deployment:
     enabled: false
   podSecurityContext: {}
   securityContext: {}
-  resources: 
+  resources:
     requests:
       memory: 256Mi
       cpu: 50m
@@ -159,7 +155,7 @@ service:
   enabled: true
   type: ClusterIP
   name: *nameOverride
-  port: 
+  port:
     - port: 80
       targetPort: 80
       protocol: TCP
@@ -220,7 +216,9 @@ autoscaling:
   # Example of Autoscaling configuration
   # targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
-
+image:
+  repository: 727245885999.dkr.ecr.ap-south-1.amazonaws.com/html
+  tag: preprod-15
 # Database migration configuration
 # goDBMigration:
 #        enabled: false
@@ -233,31 +231,30 @@ autoscaling:
 #   args: 
 #    - -c
 #    - cd /var/www/html && /usr/local/bin/php /var/www/html/artisan migrate --force && /usr/local/bin/php /var/www/html/artisan storage:link
-
-  # Example of Database migration configuration
-  # replicaCount: 1
-  # imagePullSecrets:
-  #   - name: example-image-pull-secret
-  # image:
-  #   repository: example-repository
-  #   pullPolicy: IfNotPresent
-  #   tag: example-ta:wqg
-  # livenessProbe: {}
-  # readinessProbe: {}
-  # startupProbe: {}
-  # podAnnotations: {}
-  # podSecurityContext: {}
-  # securityContext: {}
-  # resources: 
-  #   requests:
-  #     memory: example-memory-request
-  #     cpu: example-cpu-request
-  #   limits:
-  #     memory: example-memory-limit
-  #     cpu: example-cpu-limit
-  # nodeSelector: {}
-  # tolerations: []
-  # affinity: {}
-  # envFrom:
-  #   - type: configmap
-  #     suffix: example-configmap
+# Example of Database migration configuration
+# replicaCount: 1
+# imagePullSecrets:
+#   - name: example-image-pull-secret
+# image:
+#   repository: example-repository
+#   pullPolicy: IfNotPresent
+#   tag: example-ta:wqg
+# livenessProbe: {}
+# readinessProbe: {}
+# startupProbe: {}
+# podAnnotations: {}
+# podSecurityContext: {}
+# securityContext: {}
+# resources: 
+#   requests:
+#     memory: example-memory-request
+#     cpu: example-cpu-request
+#   limits:
+#     memory: example-memory-limit
+#     cpu: example-cpu-limit
+# nodeSelector: {}
+# tolerations: []
+# affinity: {}
+# envFrom:
+#   - type: configmap
+#     suffix: example-configmap
