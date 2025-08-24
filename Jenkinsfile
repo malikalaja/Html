@@ -1,14 +1,16 @@
-def branchName     = params.BranchName ?: "main"
-def gitUrl         = "https://github.com/malikalaja/Html.git"
-def gitUrlCode     = "https://github.com/malikalaja/Html.git"
-def serviceName    = "htmltask"
-def EnvName        = "preprod"
-def registryId     = "727245885999.dkr.ecr.ap-south-1.amazonaws.com"
-def awsRegion      = "ap-south-1"
-def ecrUrl         = "${registryId}/${serviceName}"
-def dockerfile     = "Dockerfile"
-def imageTag       = "${EnvName}-${BUILD_NUMBER}"
-def ARGOCD_URL     = "https://argocd.preprod.slashtec.com"
+def branchName  = params.BranchName ?: "main"
+def gitUrl      = "https://github.com/malikalaja/Html.git"
+def gitUrlCode  = "https://github.com/malikalaja/Html.git"
+
+def serviceName = "html"                           // <-- match ECR repo name
+def EnvName     = "preprod"
+def awsRegion   = "ap-south-1"
+def registryId  = "727245885999.dkr.ecr.${awsRegion}.amazonaws.com"
+def ecrUrl      = "${registryId}/${serviceName}"   // -> 7272…/html
+def dockerfile  = "Dockerfile"
+def imageTag    = "${EnvName}-${BUILD_NUMBER}"
+def ARGOCD_URL  = "https://argocd.preprod.slashtec.com"
+
 
 // AppConfig Params
 def applicationName = "htmltask"
