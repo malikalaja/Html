@@ -28,7 +28,7 @@ pipeline {
         stage ("Get the app code") {
             steps {
                 checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]] , extensions: [], userRemoteConfigs: [[ url: "${gitUrlCode}"]]])
-                sh "cp ${htmltaskDir}/Dockerfile ${dockerfile}"
+                echo "Code checked out successfully"
             }
         }
         
