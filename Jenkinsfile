@@ -18,15 +18,10 @@ def configName = "preprod"
 def clientId = "${applicationName}-${envName}"
 def latestTagValue = params.Tag
 def namespace = "preprod"
-def helmDir = "slashtec/${envName}/${applicationName}/helm"
+def helmDir = "/helm"
 def slashtecDir = "slashtec/slashtec/${envName}/${applicationName}"
 
-node {
-  withCredentials([string(credentialsId: 'GITHUB_CREDS_ID', variable: 'GITHUB_TOKEN')]) {
-    try {
-      stage('cleanup') {
-        cleanWs()
-      }
+
       stage ("Get the app code") {
         checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]] , extensions: [], userRemoteConfigs: [[ url: "${gitUrlCode}"]]])
         sh "rm -rf ~/workspace/\"${JOB_NAME}\"/slashtec"
@@ -51,12 +46,10 @@ node {
         sh("docker rmi -f ${ecrUrl}/${serviceName}:${imageTag} || :")
       }
       stage ("Deploy ${serviceName} to ${EnvName} Environment") {
-        sh ("cd slashtec/${helmDir}; pathEnv=\".deployment.image.tag\" valueEnv=\"${imageTag}\" yq 'eval(strenv(pathEnv)) = strenv(valueEnv)' -i values.yaml ; cat values.yaml")
-        sh ("cd slashtec/${helmDir}; git pull ; git add values.yaml; git commit -m 'update image tag' ;git push ${gitUrl}")
+        sh ("cd Html/${helmDir}; git pull ; git add values.yaml; git commit -m 'update image tag' ;git push ${gitUrl}")
+        sh ("cd Html/${helmDir}; pathEnv=\".deployment.image.tag\" valueEnv=\"${imageTag}\" yq 'eval(strenv(pathEnv)) = strenv(valueEnv)' -i values.yaml ; cat values.yaml")
       }
-    } catch (Exception e) {
-      echo "Pipeline failed: ${e.getMessage()}"
-      throw e
-    }
-  }
-}
+    
+  
+  
+
