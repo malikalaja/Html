@@ -1,7 +1,7 @@
 def branchName     = params.BranchName ?: "main"
 def gitUrl         = "git@github.com:malikalaja/Html.git"
 def gitUrlCode     = "git@github.com:malikalaja/Html.git"
-def serviceName    = "htmltask"
+def serviceName    = "html"
 def EnvName        = "preprod"
 def registryId     = "727245885999"
 def awsRegion      = "ap-south-1"
@@ -13,14 +13,14 @@ def ARGOCD_URL     = "https://argocd.preprod.slashtec.com"
 // AppConfig Params
 def applicationName = "htmltask"
 def envName = "preprod"
-def configName = "preprod"
-def clientId = "${applicationName}-${envName}"
+// def configName = "preprod"
+// def clientId = "${applicationName}-${envName}"
 def latestTagValue = params.Tag
 def namespace = "preprod"
 def helmDir = "helm"
 
 // this is where the extra clone ends up: ./slashtec/Html
-def slashtecDir = "slashtec/Html"
+def slashtecDir = "Html"
 
 node {
   try {
