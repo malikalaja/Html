@@ -32,7 +32,7 @@ node {
       checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]] , extensions: [], userRemoteConfigs: [[ url: "${gitUrlCode}"]]])
       sh "rm -rf slashtec"
       sh "git clone -b main ${gitUrl} slashtec"
-      sh "cp slashtec/Dockerfile/Dockerfile ${dockerfile}"
+      sh "cp slashtec/dockerfile/Dockerfile ${dockerfile}"
       sh "cp slashtec/index.html ."
     }
 
