@@ -35,7 +35,7 @@ deployment:
   image:
     repository: htmltask
     pullPolicy: Never
-    tag: "preprod-44"
+    tag: "preprod-45"
     # volumeMounts:
     #   - mountPath: /etc/localtime
     #     name: tz-config
