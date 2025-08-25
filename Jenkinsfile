@@ -8,7 +8,7 @@ def awsRegion      = "ap-south-1"
 def ecrUrl         = "727245885999.dkr.ecr.ap-south-1.amazonaws.com"
 def dockerfile     = "Dockerfile"
 def imageTag       = "${EnvName}-${BUILD_NUMBER}"
-def ARGOCD_URL     = "https://argocd.preprod.slashtec.com"
+def ARGOCD_URL     = "https://argocd.preprod.Html.com"
 
 // AppConfig Params
 def applicationName = "htmltask"
@@ -19,8 +19,8 @@ def latestTagValue = params.Tag
 def namespace = "preprod"
 def helmDir = "helm"
 
-// this is where the extra clone ends up: ./slashtec/Html
-def slashtecDir = "htmlhelm"
+// this is where the extra clone ends up: ./Html/Html
+def HtmlDir = "htmlhelm"
 
 node {
   try {
@@ -30,10 +30,10 @@ node {
     
     stage("Get the app code") {
       checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]] , extensions: [], userRemoteConfigs: [[ url: "${gitUrlCode}"]]])
-      sh "rm -rf slashtec"
-      sh "git clone -b main ${gitUrl} slashtec"
-      sh "cp slashtec/dockerfile/Dockerfile ${dockerfile}"
-      sh "cp slashtec/index.html ."
+      sh "rm -rf Html"
+      sh "git clone -b main ${gitUrl} Html"
+      sh "cp Html/dockerfile/Dockerfile ${dockerfile}"
+      sh "cp Html/index.html ."
     }
 
 
@@ -41,26 +41,26 @@ node {
     //   checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]] , extensions: [], userRemoteConfigs: [[ url: "${gitUrlCode}"]]])
 
     //   // extra clone inside workspace
-    //   sh "rm -rf slashtec"
-    //   sh "mkdir -p slashtec && cd slashtec && git clone -b ${branchName} ${gitUrl}"
+    //   sh "rm -rf Html"
+    //   sh "mkdir -p Html && cd Html && git clone -b ${branchName} ${gitUrl}"
 
     //   // Copy Dockerfile (works whether it's a file or inside a folder named Dockerfile)
     //   sh """
-    //     if [ -f "${slashtecDir}/Dockerfile" ]; then
-    //       cp "${slashtecDir}/Dockerfile" "${dockerfile}"
-    //     elif [ -f "${slashtecDir}/Dockerfile/Dockerfile" ]; then
-    //       cp "${slashtecDir}/Dockerfile/Dockerfile" "${dockerfile}"
+    //     if [ -f "${HtmlDir}/Dockerfile" ]; then
+    //       cp "${HtmlDir}/Dockerfile" "${dockerfile}"
+    //     elif [ -f "${HtmlDir}/Dockerfile/Dockerfile" ]; then
+    //       cp "${HtmlDir}/Dockerfile/Dockerfile" "${dockerfile}"
     //     else
-    //       echo "Dockerfile not found under ${slashtecDir}" >&2
+    //       echo "Dockerfile not found under ${HtmlDir}" >&2
     //       exit 1
     //     fi
     //   """
 
     //   // Copy optional files directory if present
-    //   sh "[ -d '${slashtecDir}/files' ] && cp -r '${slashtecDir}/files/'* . || true"
+    //   sh "[ -d '${HtmlDir}/files' ] && cp -r '${HtmlDir}/files/'* . || true"
 
     //   // Copy index.html
-    //   sh "cp '${slashtecDir}/index.html' ."
+    //   sh "cp '${HtmlDir}/index.html' ."
     // }
     
     // stage("Get the env variables from App") {
