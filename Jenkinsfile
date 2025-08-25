@@ -17,7 +17,7 @@ def envName = "preprod"
 // def clientId = "${applicationName}-${envName}"
 def latestTagValue = params.Tag
 def namespace = "preprod"
-def helmDir = "/helm"
+def helmDir = "helm"
 
 // this is where the extra clone ends up: ./slashtec/Html
 def slashtecDir = "htmlhelm"
