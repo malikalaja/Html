@@ -18,57 +18,67 @@ def clientId = "${applicationName}-${envName}"
 def latestTagValue = params.Tag
 def namespace = "preprod"
 def helmDir = "helm"
-def slashtecDir = "slashtec/Html"   // <-- path fixed
+
+// this is where the extra clone ends up: ./slashtec/Html
+def slashtecDir = "slashtec/Html"
 
 node {
   try {
     stage('cleanup') {
       cleanWs()
     }
-
+    
     stage ("Get the app code") {
-      checkout([$class: 'GitSCM',
-        branches: [[name: "${branchName}"]],
-        extensions: [],
-        userRemoteConfigs: [[ url: "${gitUrlCode}" ]]
-      ])
+      checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]] , extensions: [], userRemoteConfigs: [[ url: "${gitUrlCode}"]]])
 
-      // clone into a workspace-relative folder (no absolute ~/ paths)
+      // extra clone inside workspace
       sh "rm -rf slashtec"
       sh "mkdir -p slashtec && cd slashtec && git clone -b ${branchName} ${gitUrl}"
 
-      // copy from the cloned repo path
-      sh "cp ${slashtecDir}/Dockerfile ${dockerfile}"
-      sh "cp -r ${slashtecDir}/files/* ."
-      sh "cp ${slashtecDir}/index.html ."
-    }
+      // Copy Dockerfile (works whether it's a file or inside a folder named Dockerfile)
+      sh """
+        if [ -f "${slashtecDir}/Dockerfile" ]; then
+          cp "${slashtecDir}/Dockerfile" "${dockerfile}"
+        elif [ -f "${slashtecDir}/Dockerfile/Dockerfile" ]; then
+          cp "${slashtecDir}/Dockerfile/Dockerfile" "${dockerfile}"
+        else
+          echo "Dockerfile not found under ${slashtecDir}" >&2
+          exit 1
+        fi
+      """
 
+      // Copy optional files directory if present
+      sh "[ -d '${slashtecDir}/files' ] && cp -r '${slashtecDir}/files/'* . || true"
+
+      // Copy index.html
+      sh "cp '${slashtecDir}/index.html' ."
+    }
+    
     stage("Get the env variables from App") {
       sh "aws appconfig get-configuration --application ${applicationName} --environment ${envName} --configuration ${configName} --client-id ${clientId} .env --region ${awsRegion}"
     }
-
+    
     stage('login to ecr') {
-      sh "aws ecr get-login-password --region ${awsRegion} | docker login --username AWS --password-stdin ${ecrUrl}"
+      sh("aws ecr get-login-password --region ${awsRegion}  | docker login --username AWS --password-stdin ${ecrUrl}")
     }
-
+    
     stage('Build Docker Image') {
-      sh "docker build -t ${ecrUrl}/${serviceName}:${imageTag} -f ${dockerfile} ."
+      sh("docker build -t ${ecrUrl}/${serviceName}:${imageTag} -f ${dockerfile} .")
     }
-
+    
     stage('Push Docker Image To ECR') {
-      sh "docker push ${ecrUrl}/${serviceName}:${imageTag}"
+      sh("docker push ${ecrUrl}/${serviceName}:${imageTag}")
     }
-
+    
     stage('Clean docker images') {
-      sh "docker rmi -f ${ecrUrl}/${serviceName}:${imageTag} || :"
+      sh("docker rmi -f ${ecrUrl}/${serviceName}:${imageTag} || :")
     }
-
+    
     stage ("Deploy ${serviceName} to ${EnvName} Environment") {
-      // use the same cloned repo path for helm edits
-      sh "cd ${slashtecDir}/${helmDir}; pathEnv=\"value.image.tag\" valueEnv=\"${imageTag}\" yq 'eval(strenv(pathEnv)) = strenv(valueEnv)' -i values.yaml ; cat values.yaml"
-      sh "cd ${slashtecDir}/${helmDir}; git pull ; git add values.yaml; git commit -m 'update image tag' ; git push ${gitUrl}"
+      sh("cd ${slashtecDir}/${helmDir}; pathEnv=\"value.image.tag\" valueEnv=\"${imageTag}\" yq 'eval(strenv(pathEnv)) = strenv(valueEnv)' -i values.yaml ; cat values.yaml")
+      sh("cd ${slashtecDir}/${helmDir}; git pull ; git add values.yaml; git commit -m 'update image tag' || true ; git push ${gitUrl}")
     }
-
+    
   } catch (e) {
     currentBuild.result = "FAILED"
     echo "Pipeline failed: ${e.getMessage()}"
