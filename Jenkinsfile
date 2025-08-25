@@ -19,7 +19,7 @@ def clientId = "${applicationName}-${envName}"
 def latestTagValue = params.Tag
 def namespace = "preprod"
 def helmDir = "/helm"
-def slashtecDir = "HTml"
+def slashtecDir = "Html"
 
 node {
   try {
