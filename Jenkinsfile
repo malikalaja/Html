@@ -1,76 +1,62 @@
 def branchName     = params.BranchName ?: "main"
 def gitUrl         = "git@github.com:malikalaja/Html.git"
 def gitUrlCode     = "git@github.com:malikalaja/Html.git"
-def serviceName    = "html"
+def serviceName    = "htmltask"
 def EnvName        = "preprod"
-def registryId     = "727245885999.dkr.ecr.ap-south-1.amazonaws.com"
+def registryId     = "727245885999"
 def awsRegion      = "ap-south-1"
-def ecrUrl         = "${registryId}/${serviceName}"
+def ecrUrl         = "727245885999.dkr.ecr.ap-south-1.amazonaws.com"
 def dockerfile     = "Dockerfile"
 def imageTag       = "${EnvName}-${BUILD_NUMBER}"
 def ARGOCD_URL     = "https://argocd.preprod.slashtec.com"
-def helmDir = "helm"
 
-pipeline {
-    agent any
-    
-    stages {
-        stage ("Get the app code") {
-            steps {
-                checkout([$class: 'GitSCM',
-                  branches: [[name: "${branchName}"]],
-                  extensions: [[$class: 'LocalBranch', localBranch: "${branchName}"]],
-                  userRemoteConfigs: [[url: "${gitUrlCode}", credentialsId: "GITHUB_CREDS_ID"]]
-                ])
-                echo "Code checked out successfully"
-            }
-        }
-        
-        stage('login to ecr') {
-            steps {
-                sh("aws ecr get-login-password --region ${awsRegion}  | docker login --username AWS --password-stdin ${registryId}")
-            }
-        }
-        
-        stage('Build Docker Image') {
-            steps {
-                sh("docker build -t ${ecrUrl}:${imageTag} -f ${dockerfile} .")
-            }
-        }
-        
-        stage('Push Docker Image To ECR') {
-            steps {
-                sh("docker push ${ecrUrl}:${imageTag}")
-            }
-        }
-        
-        stage('Clean docker images') {
-            steps {
-                sh("docker rmi -f ${ecrUrl}:${imageTag} || :")
-            }
-        }
-        
-        stage ("Deploy to Environment") {
-            steps {
-                script {
-                    sh ("cd ${helmDir}; yq eval -i '.image.repository = \"${ecrUrl}\"' values.yaml")
-                    sh ("cd ${helmDir}; yq eval -i '.image.tag = \"${imageTag}\"' values.yaml ; cat values.yaml")
-                    sh ("cd ${helmDir}; git config user.email 'jenkins@local'")
-                    sh ("cd ${helmDir}; git config user.name 'Jenkins'")
-                    sh ("cd ${helmDir}; git fetch origin ${branchName}")
-                    sh ("cd ${helmDir}; git checkout ${branchName} || true")
-                    sh ("cd ${helmDir}; git pull origin ${branchName}")
-                    sh ("cd ${helmDir}; git add values.yaml")
-                    sh ("cd ${helmDir}; git commit -m 'update image tag ${imageTag}' || true")
-                    sh ("cd ${helmDir}; git push origin ${branchName}")
-                }
-            }
-        }
+// AppConfig Params
+def applicationName = "htmltask"
+def envName = "preprod"
+def configName = "preprod"
+// Fix: Use string concatenation, not arithmetic
+def clientId = "${applicationName}-${envName}"
+def latestTagValue = params.Tag
+def namespace = "preprod"
+def helmDir = "slashtec/${envName}/${applicationName}/helm"
+def slashtecDir = "slashtec/slashtec/${envName}/${applicationName}"
+
+node {
+  withCredentials([string(credentialsId: 'GITHUB_CREDS_ID', variable: 'GITHUB_TOKEN')]) {
+    try {
+      stage('cleanup') {
+        cleanWs()
+      }
+      stage ("Get the app code") {
+        checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]] , extensions: [], userRemoteConfigs: [[ url: "${gitUrlCode}"]]])
+        sh "rm -rf ~/workspace/\"${JOB_NAME}\"/slashtec"
+        sh "mkdir ~/workspace/\"${JOB_NAME}\"/slashtec  ; cd slashtec ; git clone -b main ${gitUrl} "
+        sh("cp ${slashtecDir}/Dockerfile ${dockerfile}")
+        sh("cp -r  ${slashtecDir}/docker/* .")
+        sh("cp -r  ${slashtecDir}/files/* .")
+      }
+      stage("Get the env variables from App") {
+        sh "aws appconfig get-configuration --application ${applicationName} --environment ${envName} --configuration ${configName} --client-id ${clientId} .env --region ${awsRegion}"
+      }
+      stage('login to ecr') {
+        sh("aws ecr get-login-password --region ${awsRegion}  | docker login --username AWS --password-stdin ${ecrUrl}")
+      }
+      stage('Build Docker Image') {
+        sh("docker build -t ${ecrUrl}/${serviceName}:${imageTag} -f ${dockerfile} .")
+      }
+      stage('Push Docker Image To ECR') {
+        sh("docker push ${ecrUrl}/${serviceName}:${imageTag}")
+      }
+      stage('Clean docker images') {
+        sh("docker rmi -f ${ecrUrl}/${serviceName}:${imageTag} || :")
+      }
+      stage ("Deploy ${serviceName} to ${EnvName} Environment") {
+        sh ("cd slashtec/${helmDir}; pathEnv=\".deployment.image.tag\" valueEnv=\"${imageTag}\" yq 'eval(strenv(pathEnv)) = strenv(valueEnv)' -i values.yaml ; cat values.yaml")
+        sh ("cd slashtec/${helmDir}; git pull ; git add values.yaml; git commit -m 'update image tag' ;git push ${gitUrl}")
+      }
+    } catch (Exception e) {
+      echo "Pipeline failed: ${e.getMessage()}"
+      throw e
     }
-    
-    post {
-        always {
-            echo 'Pipeline completed!'
-        }
-    }
+  }
 }
