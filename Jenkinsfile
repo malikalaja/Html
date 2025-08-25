@@ -21,7 +21,12 @@ def namespace = "preprod"
 def helmDir = "/helm"
 def slashtecDir = "slashtec/slashtec/${envName}/${applicationName}"
 
-
+node {
+  try {
+    stage('cleanup') {
+      cleanWs()
+    }
+    
       stage ("Get the app code") {
         checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]] , extensions: [], userRemoteConfigs: [[ url: "${gitUrlCode}"]]])
         sh "rm -rf ~/workspace/\"${JOB_NAME}\"/slashtec"
@@ -50,6 +55,11 @@ def slashtecDir = "slashtec/slashtec/${envName}/${applicationName}"
         sh("cd Html/${helmDir}; git pull ; git add values.yaml; git commit -m 'update image tag' ;git push ${gitUrl}")
       }
     
+  catch (e) {
+    currentBuild.result = "FAILED"
+    echo "Pipeline failed: ${e.getMessage()}"
+    throw e
+  }
   
-  
-
+     }
+}
