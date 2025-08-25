@@ -31,9 +31,9 @@ node {
       checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]] , extensions: [], userRemoteConfigs: [[ url: "${gitUrlCode}"]]])
       sh "rm -rf ~/workspace/\"${JOB_NAME}\"/slashtec"
       sh "mkdir ~/workspace/\"${JOB_NAME}\"/slashtec  ; cd slashtec ; git clone -b main ${gitUrl} "
-      sh("cp ${slashtecDir}/Dockerflie/Dockerfile ${dockerfile}")
-      sh("cp -r  ${slashtecDir}/docker/* .")
+      sh("cp -r  ${slashtecDir}/Dockerflie/* .")
       sh("cp -r  ${slashtecDir}/files/* .")
+      sh ("cp ${slashtecDir}/index.html .")
     }
     
     stage("Get the env variables from App") {
