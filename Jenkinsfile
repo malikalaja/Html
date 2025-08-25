@@ -31,7 +31,7 @@ node {
       checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]] , extensions: [], userRemoteConfigs: [[ url: "${gitUrlCode}"]]])
       sh "rm -rf ~/workspace/\"${JOB_NAME}\"/slashtec"
       sh "mkdir ~/workspace/\"${JOB_NAME}\"/slashtec  ; cd slashtec ; git clone -b main ${gitUrl} "
-      sh("cp ${slashtecDir}/Dockerfile ${dockerfile}")
+      sh("cp ${slashtecDir}/Dickerfile ${dockerfile}")
       sh("cp -r  ${slashtecDir}/docker/* .")
       sh("cp -r  ${slashtecDir}/files/* .")
     }
