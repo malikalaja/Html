@@ -33,9 +33,9 @@ deployment:
   # imagePullSecrets:
   #   - name: docker    ### if required
   image:
-    repository: htmltask  
+    repository: htmltask
     pullPolicy: Never
-    tag: "preprod-45"
+    tag: "preprod-46"
     # volumeMounts:
     #   - mountPath: /etc/localtime
     #     name: tz-config
