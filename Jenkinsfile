@@ -20,7 +20,7 @@ def namespace = "preprod"
 def helmDir = "/helm"
 
 // this is where the extra clone ends up: ./slashtec/Html
-def slashtecDir = "Htmlhelm"
+def slashtecDir = "htmlhelm"
 
 node {
   try {
