@@ -18,8 +18,8 @@ def configName = "preprod"
 def clientId = "${applicationName}-${envName}"
 def latestTagValue = params.Tag
 def namespace = "preprod"
-def helmDir = "/helm"
-def slashtecDir = "Html"
+def helmDir = "helm"
+def slashtecDir = "."
 
 node {
   try {
@@ -31,7 +31,7 @@ node {
       checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]] , extensions: [], userRemoteConfigs: [[ url: "${gitUrlCode}"]]])
       sh "rm -rf ~/workspace/\"${JOB_NAME}\"/slashtec"
       sh "mkdir ~/workspace/\"${JOB_NAME}\"/slashtec  ; cd slashtec ; git clone -b main ${gitUrl} "
-      sh("cp -r  ${slashtecDir}/Dockerflie/* .")
+      sh("cp ${slashtecDir}/Dockerfile ${dockerfile}")
       sh("cp -r  ${slashtecDir}/files/* .")
       sh ("cp ${slashtecDir}/index.html .")
     }
