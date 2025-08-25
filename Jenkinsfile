@@ -54,9 +54,9 @@ node {
       sh "cp '${slashtecDir}/index.html' ."
     }
     
-    stage("Get the env variables from App") {
-      sh "aws appconfig get-configuration --application ${applicationName} --environment ${envName} --configuration ${configName} --client-id ${clientId} .env --region ${awsRegion}"
-    }
+    // stage("Get the env variables from App") {
+    //   sh "aws appconfig get-configuration --application ${applicationName} --environment ${envName} --configuration ${configName} --client-id ${clientId} .env --region ${awsRegion}"
+    // }
     
     stage('login to ecr') {
       sh("aws ecr get-login-password --region ${awsRegion}  | docker login --username AWS --password-stdin ${ecrUrl}")
