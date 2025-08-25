@@ -33,7 +33,7 @@ deployment:
   # imagePullSecrets:
   #   - name: docker    ### if required
   image:
-    repository: htmltask
+    repository: htmltask  
     pullPolicy: Never
     tag: "v2"
     # volumeMounts:
