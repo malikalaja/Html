@@ -28,31 +28,40 @@ node {
       cleanWs()
     }
     
-    stage ("Get the app code") {
+    stage("Get the app code") {
       checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]] , extensions: [], userRemoteConfigs: [[ url: "${gitUrlCode}"]]])
-
-      // extra clone inside workspace
       sh "rm -rf slashtec"
-      sh "mkdir -p slashtec && cd slashtec && git clone -b ${branchName} ${gitUrl}"
-
-      // Copy Dockerfile (works whether it's a file or inside a folder named Dockerfile)
-      sh """
-        if [ -f "${slashtecDir}/Dockerfile" ]; then
-          cp "${slashtecDir}/Dockerfile" "${dockerfile}"
-        elif [ -f "${slashtecDir}/Dockerfile/Dockerfile" ]; then
-          cp "${slashtecDir}/Dockerfile/Dockerfile" "${dockerfile}"
-        else
-          echo "Dockerfile not found under ${slashtecDir}" >&2
-          exit 1
-        fi
-      """
-
-      // Copy optional files directory if present
-      sh "[ -d '${slashtecDir}/files' ] && cp -r '${slashtecDir}/files/'* . || true"
-
-      // Copy index.html
-      sh "cp '${slashtecDir}/index.html' ."
+      sh "git clone -b main ${gitUrl} slashtec"
+      sh "cp slashtec/Dockerfile/Dockerfile ${dockerfile}"
+      sh "cp slashtec/index.html ."
     }
+
+
+    // stage ("Get the app code") {
+    //   checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]] , extensions: [], userRemoteConfigs: [[ url: "${gitUrlCode}"]]])
+
+    //   // extra clone inside workspace
+    //   sh "rm -rf slashtec"
+    //   sh "mkdir -p slashtec && cd slashtec && git clone -b ${branchName} ${gitUrl}"
+
+    //   // Copy Dockerfile (works whether it's a file or inside a folder named Dockerfile)
+    //   sh """
+    //     if [ -f "${slashtecDir}/Dockerfile" ]; then
+    //       cp "${slashtecDir}/Dockerfile" "${dockerfile}"
+    //     elif [ -f "${slashtecDir}/Dockerfile/Dockerfile" ]; then
+    //       cp "${slashtecDir}/Dockerfile/Dockerfile" "${dockerfile}"
+    //     else
+    //       echo "Dockerfile not found under ${slashtecDir}" >&2
+    //       exit 1
+    //     fi
+    //   """
+
+    //   // Copy optional files directory if present
+    //   sh "[ -d '${slashtecDir}/files' ] && cp -r '${slashtecDir}/files/'* . || true"
+
+    //   // Copy index.html
+    //   sh "cp '${slashtecDir}/index.html' ."
+    // }
     
     // stage("Get the env variables from App") {
     //   sh "aws appconfig get-configuration --application ${applicationName} --environment ${envName} --configuration ${configName} --client-id ${clientId} .env --region ${awsRegion}"
