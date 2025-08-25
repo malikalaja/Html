@@ -17,10 +17,10 @@ def envName = "preprod"
 // def clientId = "${applicationName}-${envName}"
 def latestTagValue = params.Tag
 def namespace = "preprod"
-def helmDir = "helm"
+def helmDir = "/helm"
 
 // this is where the extra clone ends up: ./slashtec/Html
-def slashtecDir = "Html"
+def slashtecDir = "Htmlhelm"
 
 node {
   try {
@@ -32,7 +32,7 @@ node {
       checkout([$class: 'GitSCM', branches: [[name: "${branchName}"]] , extensions: [], userRemoteConfigs: [[ url: "${gitUrlCode}"]]])
       sh "rm -rf slashtec"
       sh "git clone -b main ${gitUrl} slashtec"
-      sh "cp slashtec/Dockerfile ${dockerfile}"
+      sh "cp slashtec/Dockerfile/Dockerfile ${dockerfile}"
       sh "cp slashtec/index.html ."
     }
 
@@ -84,8 +84,8 @@ node {
     }
     
     stage ("Deploy ${serviceName} to ${EnvName} Environment") {
-      sh("cd ${slashtecDir}/${helmDir}; pathEnv=\"value.image.tag\" valueEnv=\"${imageTag}\" yq 'eval(strenv(pathEnv)) = strenv(valueEnv)' -i values.yaml ; cat values.yaml")
-      sh("cd ${slashtecDir}/${helmDir}; git pull ; git add values.yaml; git commit -m 'update image tag' || true ; git push ${gitUrl}")
+      sh("cd Html/${helmDir}; pathEnv=\".deployment.image.tag\" valueEnv=\"${imageTag}\" yq 'eval(strenv(pathEnv)) = strenv(valueEnv)' -i values.yaml ; cat values.yaml")
+      sh("cd Html/${helmDir}; git pull ; git add values.yaml; git commit -m 'update image tag' || true ; git push ${gitUrl}")
     }
     
   } catch (e) {
